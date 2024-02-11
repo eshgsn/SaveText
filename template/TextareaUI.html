@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save Text</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #aad4f7;
+        }
+
+        .navbar {
+            background-color: #333;
+            overflow: hidden;
+        }
+
+        .navbar a {
+            float: right;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+        }
+
+        .navbar a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .save-text {
+            padding: 20px;
+            text-align: center;
+        }
+
+        #text-area {
+            width: 90%;
+            height: 380px;
+            resize: none;
+            padding: 10px;
+            box-sizing: border-box;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="#" onclick="saveText()">Delete</a>
+    <a href="#">Open</a>
+    <a href="#" onclick="save_file()">Save</a>
+</div>
+
+<div class="save-text">
+    <h1>Save Text {{userId}}</h1>
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+    <textarea id="text-area" placeholder="Write your text here..."></textarea>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+        
+        // Access the parameters by name
+        const param1 = urlParams.get('userId');
+        console.log('param1',param1)
+    function saveText() {
+        var text = document.getElementById("text-area").value;
+        // Here you can implement the logic to save the text
+        // For example, you can use AJAX to send the text to the server
+        console.log("Text saved:", text);
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+        function save_file() {
+            var fileName = prompt("Enter file name:");
+            const csrftoken = getCookie('csrftoken');
+            if (fileName != null && fileName != "") {
+               console.log(fileName);
+               var text = document.getElementById("text-area").value;
+               let data= {
+                fileName,
+                textFile:text,
+                ownerUserId: param1
+               }
+               fetch("http://127.0.0.1:8000/user-data/", {
+                method: 'POST',
+                headers: {
+                    "X-CSRFToken": csrftoken ,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response:', data);
+                alert("pass")
+                // Handle the response data as needed
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("fail xyz")
+                // Handle errors
+            });
+            }
+        }
+</script>
+
+</body>
+</html>
